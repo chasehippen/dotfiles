@@ -1,0 +1,6 @@
+- name: Copy alacritty config
+  ansible.builtin.copy:
+    src: configs/alacritty/.alacritty.yml
+    dest: ~/.alacritty.yml
+    owner: "{{ ansible_user_id }}"
+    mode: '0644'

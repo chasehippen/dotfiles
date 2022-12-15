@@ -1,0 +1,12 @@
+- name: Create User Dirs
+  ansible.builtin.file:
+    path: ~/{{ item }}
+    state: directory
+    mode: '0755'
+  with_items:
+    - .config
+    - .kube
+    - dev
+    - temp
+    - git
+

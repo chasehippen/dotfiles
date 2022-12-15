@@ -1,0 +1,6 @@
+repos:
+  - repo: https://github.com/ansible-community/ansible-lint
+    rev: 'v6.10.0'
+    hooks:
+      - id: ansible-lint
+        entry: ansible-lint -x command-instead-of-shell -x no-changed-when -x git-latest -x yaml

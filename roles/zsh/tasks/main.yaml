@@ -1,0 +1,76 @@
+---
+- name: Check existence of fonts dir
+  ansible.builtin.stat:
+    path: "/tmp/fonts"
+  register: powerline_fonts
+
+# Install powerline fonts
+- name: Clone powerline fonts repo
+  ansible.builtin.git:
+    repo: 'https://github.com/powerline/fonts.git'
+    dest: /tmp/fonts
+  when: not powerline_fonts.stat.exists
+
+# install fonts
+- name: Install powerline fonts
+  ansible.builtin.shell: /tmp/fonts/install.sh
+  when: not powerline_fonts.stat.exists
+
+# tasks file for oh-my-zsh
+- name: Check existence of oh-my-zsh directory
+  ansible.builtin.stat:
+    path: "~/.oh-my-zsh"
+  register: oh_my_stats
+
+- name: Fetch oh-my-zsh
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh
+    dest: /tmp/install-oh-my-zsh.sh
+    mode: 0755
+  when: not oh_my_stats.stat.exists
+
+- name: Install oh-my-zsh
+  ansible.builtin.command: zsh /tmp/install-oh-my-zsh.sh
+  when: not oh_my_stats.stat.exists
+
+- name: Copy shell config
+  ansible.builtin.copy:
+    src: configs/zsh/.zshrc
+    dest: ~/.zshrc
+    owner: "{{ ansible_user_id }}"
+    mode: '0644'
+
+- name: Copy p10k config
+  ansible.builtin.copy:
+    src: configs/zsh/.p10k.zsh
+    dest: ~/.p10k.zsh
+    owner: "{{ ansible_user_id }}"
+    mode: '0644'
+
+- name: Install zsh-autosuggestions
+  ansible.builtin.git:
+    repo: 'https://github.com/zsh-users/zsh-autosuggestions.git'
+    dest: "~/.oh-my-zsh/plugins/zsh-autosuggestions"
+    force: true
+
+- name: Install zsh-syntax-highlighting
+  ansible.builtin.git:
+    repo: 'https://github.com/zsh-users/zsh-syntax-highlighting'
+    dest: "~/.oh-my-zsh/plugins/zsh-syntax-highlighting"
+    force: true
+
+- name: Add correct p10k source (apple silicon)
+  ansible.builtin.lineinfile:
+    path: ~/.zshrc
+    regexp: '###P10K_SOURCE###'
+    insertafter: '###P10K_SOURCE###'
+    line: source /opt/homebrew/Cellar/powerlevel10k/1.16.1/powerlevel10k.zsh-theme
+  when: ansible_architecture == "arm64"
+
+- name: Add correct p10k source (intel chip)
+  ansible.builtin.lineinfile:
+    path: ~/.zshrc
+    regexp: '###P10K_SOURCE###'
+    insertafter: '###P10K_SOURCE###'
+    line: source /usr/local/opt/powerlevel10k/powerlevel10k.zsh-theme
+  when: ansible_architecture == "x86_64"
