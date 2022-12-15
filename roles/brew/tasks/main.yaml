@@ -1,0 +1,72 @@
+---
+
+- name: Install general packages
+  community.general.homebrew:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - neovim
+    - ansible-lint
+    - bash
+    - bash-completion
+    - bash-language-server
+    - checkmarx/tap/kics
+    - checkov
+    - docker
+    - fzf
+    - ag
+    - git
+    - go
+    - jq
+    - krew
+    - kube-linter
+    - kubectx
+    - kubens
+    - kubernetes-cli
+    - kustomize
+    - minikube
+    - helm
+    - lazygit
+    - lua
+    - lua-language-server
+    - neovim
+    - pre-commit
+    - romkatv/powerlevel10k/powerlevel10k
+    - tree
+    - tree-sitter
+    - vim
+    - watch
+    - wget
+    - yaml-language-server
+    - zsh
+    - zsh-autosuggestions
+  async: 300
+  poll: 0
+
+- name: Install work only packages
+  community.general.homebrew:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - 1password
+    - terraform
+    - tflint
+    - tfsec
+  tags:
+    - work
+  async: 300
+  poll: 0
+
+- name: Install home only packages
+  community.general.homebrew:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - bitwarden
+    - firefox
+    - pulumi
+    - cider
+  tags:
+    - home
+  async: 300
+  poll: 0

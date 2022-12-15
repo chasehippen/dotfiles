@@ -1,0 +1,6 @@
+---
+
+- name: Copy nvim config
+  ansible.posix.synchronize:
+    src: configs/nvim
+    dest: ~/.config/

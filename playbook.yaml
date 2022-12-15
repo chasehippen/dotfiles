@@ -1,0 +1,11 @@
+---
+- name: Setup
+  hosts: all
+
+  roles:
+  - brew
+  - user_dirs
+  - alacritty
+  - nvim
+  - zsh
+  - krew

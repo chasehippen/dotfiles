@@ -1,0 +1,12 @@
+---
+
+- name: Install krew plugins
+  ansible.builtin.shell: kubectl krew install "{{ item }}"
+  with_items:
+    - ctx
+    - ns
+    - preflight
+    - resource_capacity
+    - support_bundle
+  async: 300
+  poll: 0
