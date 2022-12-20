@@ -5,6 +5,7 @@
   community.general.snap:
     name:
       - nvim
+      - alacritty
       - bitwarden
       - bash-language-server
       - docker
