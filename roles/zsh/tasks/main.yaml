@@ -60,27 +60,25 @@
     force: true
 
 - name: Add correct p10k source (apple silicon)
-  hosts: os_macOS
   ansible.builtin.lineinfile:
     path: ~/.zshrc
     regexp: '###P10K_SOURCE###'
     insertafter: '###P10K_SOURCE###'
     line: source /opt/homebrew/Cellar/powerlevel10k/1.16.1/powerlevel10k.zsh-theme
-  when: ansible_architecture == "arm64"
+  when: ansible_architecture == "arm64" and ansible_distribution == 'macOS'
 
 - name: Add correct p10k source (intel chip)
-  hosts: os_macOS
   ansible.builtin.lineinfile:
     path: ~/.zshrc
     regexp: '###P10K_SOURCE###'
     insertafter: '###P10K_SOURCE###'
     line: source /usr/local/opt/powerlevel10k/powerlevel10k.zsh-theme
-  when: ansible_architecture == "x86_64"
+  when: ansible_architecture == "x86_64" and ansible_distribution == 'macOS'
 
 - name: Add correct p10k source (Ubuntu)
-  hosts: os_Ubuntu
   ansible.builtin.lineinfile:
     path: ~/.zshrc
     regexp: '###P10K_SOURCE###'
     insertafter: '###P10K_SOURCE###'
     line: source ~/powerlevel10k/powerlevel10k.zsh-theme
+  when: ansible_distribution == 'Ubuntu'

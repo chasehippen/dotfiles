@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Install curl
+if ! which curl > /dev/null
+then
+  echo "installing curl"
+  sudo apt install curl
+else
+  echo "curl already installed"
+fi
+
 # Install pip
 if ! command -v pip > /dev/null
 then
@@ -22,4 +31,4 @@ else
 fi
 
 # Run playbook
-ansible-playbook playbook.yaml --diff
+ansible-playbook playbook.yaml --diff -K

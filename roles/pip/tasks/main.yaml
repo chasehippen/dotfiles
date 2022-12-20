@@ -1,7 +1,7 @@
 ---
 
 - name: Install python libraries
-  community.general.easy_install:
+  ansible.builtin.pip:
     name:
       - ansible-lint
       - checkov
