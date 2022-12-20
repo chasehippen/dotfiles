@@ -1,0 +1,19 @@
+---
+
+- name: Install apt packages
+  ansible.builtin.apt:
+    name:
+      - bash-completion
+      - software-properties-common
+      - fzf
+      - silversearcher-ag
+      - ca-certificates
+      - curl
+      - virtualbox
+      - virtualbox-ext-pack
+      - lua5.4
+      - watch
+      - wget
+      - zsh
+    state: present    
+

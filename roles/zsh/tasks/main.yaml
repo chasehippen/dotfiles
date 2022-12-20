@@ -35,14 +35,14 @@
 
 - name: Copy shell config
   ansible.builtin.copy:
-    src: configs/zsh/.zshrc
+    src: configs/zsh/zshrc
     dest: ~/.zshrc
     owner: "{{ ansible_user_id }}"
     mode: '0644'
 
 - name: Copy p10k config
   ansible.builtin.copy:
-    src: configs/zsh/.p10k.zsh
+    src: configs/zsh/p10k.zsh
     dest: ~/.p10k.zsh
     owner: "{{ ansible_user_id }}"
     mode: '0644'
@@ -60,6 +60,7 @@
     force: true
 
 - name: Add correct p10k source (apple silicon)
+  hosts: os_macOS
   ansible.builtin.lineinfile:
     path: ~/.zshrc
     regexp: '###P10K_SOURCE###'
@@ -68,9 +69,18 @@
   when: ansible_architecture == "arm64"
 
 - name: Add correct p10k source (intel chip)
+  hosts: os_macOS
   ansible.builtin.lineinfile:
     path: ~/.zshrc
     regexp: '###P10K_SOURCE###'
     insertafter: '###P10K_SOURCE###'
     line: source /usr/local/opt/powerlevel10k/powerlevel10k.zsh-theme
   when: ansible_architecture == "x86_64"
+
+- name: Add correct p10k source (Ubuntu)
+  hosts: os_Ubuntu
+  ansible.builtin.lineinfile:
+    path: ~/.zshrc
+    regexp: '###P10K_SOURCE###'
+    insertafter: '###P10K_SOURCE###'
+    line: source ~/powerlevel10k/powerlevel10k.zsh-theme

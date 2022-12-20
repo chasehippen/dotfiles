@@ -5,6 +5,7 @@
     name: "{{ item }}"
     state: present
   with_items:
+    - 1password
     - neovim
     - ansible-lint
     - bash
@@ -34,39 +35,12 @@
     - romkatv/powerlevel10k/powerlevel10k
     - tree
     - tree-sitter
+    - terraform
+    - tflint
+    - tfsec
     - vim
     - watch
     - wget
     - yaml-language-server
     - zsh
     - zsh-autosuggestions
-  async: 300
-  poll: 0
-
-- name: Install work only packages
-  community.general.homebrew:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - 1password
-    - terraform
-    - tflint
-    - tfsec
-  tags:
-    - work
-  async: 300
-  poll: 0
-
-- name: Install home only packages
-  community.general.homebrew:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - bitwarden
-    - firefox
-    - pulumi
-    - cider
-  tags:
-    - home
-  async: 300
-  poll: 0

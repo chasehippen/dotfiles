@@ -1,0 +1,9 @@
+---
+
+- name: Install python libraries
+  community.general.easy_install:
+    name:
+      - ansible-lint
+      - checkov
+    state: present
+
