@@ -10,6 +10,8 @@
       KREW="krew-${OS}_${ARCH}" &&
       curl -fsSL "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" --output /tmp/krew.tar.gz
     )
+  args:
+    executable: /bin/bash
 
 - name: Make tempdir
   ansible.builtin.file:
