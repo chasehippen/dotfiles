@@ -1,22 +1,51 @@
 ---
 
-- name: Install krew
+- name: Fetch krew
   ansible.builtin.shell: |
+    set -o pipefail
     (
       set -x; cd "$(mktemp -d)" &&
       OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
       ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
       KREW="krew-${OS}_${ARCH}" &&
-      curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
-      tar zxvf "${KREW}.tar.gz" &&
-      ./"${KREW}" install krew
+      curl -fsSL "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" --output /tmp/krew.tar.gz
     )
+  args:
+    executable: /bin/bash
 
-- name: Add krew to path
-  ansible.builtin.lineinfile: 
-    path: ~/.zshrc
-    line: export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-    state: present
+- name: Make tempdir
+  ansible.builtin.file:
+    path: /tmp/krew
+    state: directory
+
+- name: Unarchive krew
+  ansible.builtin.unarchive:
+    src: /tmp/krew.tar.gz
+    dest: /tmp/krew
+    remote_src: true
+
+- name: Set fact Amd64 fact on x86_64 platforms
+  ansible.builtin.set_fact:
+    linux_platform: amd64
+  when: ansible_architecture == "x86_64"
+
+- name: Set fact Arm fact on Arm platforms
+  ansible.builtin.set_fact:
+    linux_platform: arm
+  when: ansible_architecture == "arm"
+
+- name: Copy krew plugin to /usr/local/bin
+  become: true
+  ansible.builtin.copy:
+    src: "/tmp/krew/krew-{{ ansible_system|lower }}_{{ linux_platform }}"
+    dest: /usr/local/bin/kubectl-krew
+    mode: 0755
+    remote_src: true
+
+- name: Run Krew Update
+  ansible.builtin.shell: kubectl krew update
+  args:
+    creates: /root/.krew/index/plugins/krew_plugins.yaml
 
 - name: Install krew plugins
   ansible.builtin.shell: kubectl krew install "{{ item }}"
@@ -24,5 +53,5 @@
     - ctx
     - ns
     - preflight
-    - resource_capacity
-    - support_bundle
+    - resource-capacity
+    - support-bundle
