@@ -1,11 +1,29 @@
 ---
-- name: Setup
-  hosts: all
 
-  roles:
-  - brew
+- name: Group by distro
+  hosts: all
+  tasks:
+    - name: Group by distro
+      group_by:
+        key: os_{{ ansible_facts['distribution'] }}
+
+- name: Setup all hosts
+  hosts: all
   - user_dirs
   - alacritty
   - nvim
   - zsh
   - krew
+
+- name: Setup macOS hosts
+  hosts: os_macOS
+  - brew
+
+- name: Setup ubuntu hosts
+  hosts: os_Ubuntu
+
+  roles:
+  - apt
+  - curl
+  - pip
+  - snap

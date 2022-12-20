@@ -10,3 +10,8 @@
     - temp
     - git
 
+- name: Create lsp config dir
+  ansible.builtin.file:
+    path: ~/.config/lsp/
+    state: directory
+    mode: '0755'

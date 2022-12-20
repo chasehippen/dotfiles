@@ -1,0 +1,29 @@
+---
+
+- name: Download minikube package
+  ansible.builtin.get_url:
+    url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+    dest: /tmp/minikube-linux-amd64
+
+- name: Install minikube
+  ansible.builtin.shell: install /tmp/minikube-linux-amd64
+
+- name: Download lua-language-server tarball
+  ansible.builtin.get_url:
+    url: https://github.com/sumneko/lua-language-server/releases/download/3.6.4/lua-language-server-3.6.4-linux-x64.tar.gz
+    dest: /tmp/lua-language-server-3.6.4-linux-x64.tar.gz
+
+- name: Extract lua-language-server
+  ansible.builtin.unarchive:
+    src: /tmp/lua-language-server-3.6.4-linux-x64.tar.gz
+    dest: ~/.config/lsp/
+  
+- name: PATH wrapper script for lua-language-server
+  ansible.builtin.copy:
+    dest: /usr/bin/lua-language-server
+    content: |
+      #!/bin/bash
+      exec "~/.config/bin/lua-language-server" "$@"
+
+- name: Install Pulumi
+  ansible.builtin.shell: curl -sSf https://get.pulumi.com | sh -s -- -y
