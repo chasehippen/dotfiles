@@ -1,35 +1,23 @@
 ---
 
-- name: Check for minikube installed
-  ansible.builtin.shell: command -v minikube
-  register: check_minikube
-
 - name: Download minikube package
   ansible.builtin.get_url:
     url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
     dest: /tmp/minikube-linux-amd64
-  when: check_minikube == ""
 
 - name: Install minikube
   become: true
   ansible.builtin.shell: install /tmp/minikube-linux-amd64 /usr/local/bin/minikube
-  when: check_minikube == ""
-
-- name: Check for lua-language-server installed
-  ansible.builtin.shell: command -v lua-language-server
-  register: check_lua_ls
 
 - name: Download lua-language-server tarball
   ansible.builtin.get_url:
     url: https://github.com/sumneko/lua-language-server/releases/download/3.6.4/lua-language-server-3.6.4-linux-x64.tar.gz
     dest: /tmp/lua-language-server-3.6.4-linux-x64.tar.gz
-  when: check_lua_ls == ""
 
 - name: Extract lua-language-server
   ansible.builtin.unarchive:
     src: /tmp/lua-language-server-3.6.4-linux-x64.tar.gz
     dest: ~/.config/lsp/
-  when: check_lua_ls == ""
   
 - name: PATH wrapper script for lua-language-server
   become: true
@@ -38,19 +26,11 @@
     content: |
       #!/bin/bash
       exec "~/.config/bin/lua-language-server" "$@"
-  when: check_lua_ls == ""
-
-- name: Check for pulumi installed
-  ansible.builtin.shell: command -v pulumi
-  register: check_pulumi
 
 - name: Download Pulumi install script
   ansible.builtin.get_url:
     url: https://get.pulumi.com
     dest: /tmp/pulumi.sh
-  when: check_pulumi == ""
 
 - name: Install Pulumi
-  become: true
   ansible.builtin.shell: . /tmp/pulumi.sh
-  when: check_pulumi == ""

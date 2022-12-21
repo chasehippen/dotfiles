@@ -11,7 +11,6 @@
   hosts: localhost
   roles:
     - user_dirs
-    - alacritty
     - nvim
     - zsh
 
@@ -22,7 +21,6 @@
 
 - name: Setup ubuntu hosts
   hosts: os_Ubuntu
-
   roles:
     - apt
     - curl

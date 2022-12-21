@@ -1,11 +1,9 @@
 ---
 
 - name: Install snap packages
-  become: true
   community.general.snap:
     name:
       - nvim
-      - alacritty
       - bitwarden
       - bash-language-server
       - docker
@@ -22,25 +20,17 @@
     classic: true
     state: present
 
-- name: Check for installed Cider
-  ansible.builtin.shell: command -v cider
-  register: check_cider
-
 - name: Get Cider Installer
   ansible.builtin.get_url:
     url: https://github.com/ciderapp/cider-releases/releases/download/v1.5.9/cider_1.5.9_amd64.snap
     dest: /tmp/cider_1.5.9_amd64.snap
-  when: check_cider == ""
 
 - name: Install Cider
   become: true
   ansible.builtin.shell: snap install /tmp/cider_1.5.9_amd64.snap --dangerous
-  when: check_cider == ""
-  
 
 # --dangerous parameter not available to ansible snap module https://github.com/ansible-collections/community.general/issues/5715
 # - name: Install Cider
-#   become: true
 #   community.general.snap:
 #     name: /tmp/cider_1.5.9_amd64.snap
 #     options: ['--dangerous=true']
