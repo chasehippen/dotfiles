@@ -26,6 +26,11 @@
       - libfontconfig1-dev
       - libxcb-xfixes0-dev
       - libxkbcommon-dev
+      - pkg-config
+      - libfreetype6-dev
+      - libfontconfig1-dev
+      - libxcb-xfixes0-dev
+      - libxkbcommon-dev
       - bash-completion
       - software-properties-common
       - fzf
