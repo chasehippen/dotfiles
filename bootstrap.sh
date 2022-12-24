@@ -55,6 +55,30 @@ cat snap | xargs -L 1 sudo snap install --classic
 
 # Install packages with curl
 # minikube
+curl -sL https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o /tmp/minikube-linux-amd64
+sudo install /tmp/minikube-linux-amd64 /usr/local/bin/minikube
+
+# pulumi
+curl -fsSL https://get.pulumi.com | sh
+
+# cider
+curl -sL https://github.com/ciderapp/cider-releases/releases/download/v1.5.9/cider_1.5.9_amd64.snap -o /tmp/cider_1.5.9_amd64.snap 
+sudo snap install /tmp/cider_1.5.9_amd64.snap --dangerous
+
+# krew
+(
+  set -x; cd "$(mktemp -d)" &&
+  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+  KREW="krew-${OS}_${ARCH}" &&
+  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+  tar zxvf "${KREW}.tar.gz" &&
+  ./"${KREW}" install krew
+)
+
+grep -qxF 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' $HOME/.zshrc || echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> $HOME/.zshrc
+
+cat krew | xargs ${KREW_ROOT:-$HOME/.krew}/bin/kubectl-krew install 
 
 # Configure neovim
 cp -r config/nvim/ $HOME/.config/
