@@ -1,0 +1,6 @@
+require('user.colorscheme')
+require('user.lualine')
+require('user.treesitter')
+require('user.comment')
+require('user.telescope')
+require('user.lspzero')

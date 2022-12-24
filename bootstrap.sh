@@ -15,7 +15,7 @@ add_ppa() {
 }
 
 # Add alacritty ppa
-add_ppa aslatter/ppa
+add_ppa aslatter/ppa neovim-ppa/stable
 
 # Install packages with apt
 cat apt | xargs sudo apt install -y
@@ -37,12 +37,12 @@ cd -
 fc-cache -f
 
 # Configure Alacritty
-mkdir -p $HOME/.config && mkdir -p $HOME/.config/alacritty && cp configs/alacritty/alacritty.yml $HOME/.config/alacritty
+mkdir -p $HOME/.config && mkdir -p $HOME/.config/alacritty && cp config/alacritty/alacritty.yml $HOME/.config/alacritty
 sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/alacritty 50
 sudo update-alternatives --config x-terminal-emulator
 
 git clone --depth=1 'https://github.com/romkatv/powerlevel10k.git' ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k 2> /dev/null || git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k pull
-cp configs/zsh/zshrc ~/.zshrc
+cp config/zsh/zshrc ~/.zshrc
 
 # zsh-autosuggestions
 git clone 'https://github.com/zsh-users/zsh-autosuggestions.git' ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions 2> /dev/null || git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions pull
@@ -56,3 +56,5 @@ cat snap | xargs -L 1 sudo snap install --classic
 # Install packages with curl
 # minikube
 
+# Configure neovim
+cp -r config/nvim/ $HOME/.config/
