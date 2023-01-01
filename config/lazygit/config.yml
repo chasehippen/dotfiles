@@ -1,0 +1,4 @@
+git:
+  showIcons: true
+  paging:
+    useConfig: true
