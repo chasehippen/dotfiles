@@ -82,3 +82,7 @@ cat krew | xargs ${KREW_ROOT:-$HOME/.krew}/bin/kubectl-krew install
 
 # Configure neovim
 cp -r config/nvim/ $HOME/.config/
+
+# Configure git
+cp config/git/gitconfig $HOME/.gitconfig
+mkdir -p $HOME/.config/lazygit && cp config/lazygit/config.yml $HOME/.config/lazygit/config.yml

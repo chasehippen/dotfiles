@@ -1,0 +1,5 @@
+[user]
+	email = chase@hippen.org
+	name = chasehippen
+[init]
+	defaultBranch = main
