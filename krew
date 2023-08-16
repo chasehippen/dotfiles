@@ -3,3 +3,5 @@ ns
 preflight
 resource-capacity
 support-bundle
+slice
+dds
