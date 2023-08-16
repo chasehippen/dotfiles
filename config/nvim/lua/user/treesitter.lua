@@ -12,5 +12,7 @@ require('nvim-treesitter.configs').setup({
     'go',
     'python',
     'lua',
+    'hcl',
+    'terraform',
   },
 })
