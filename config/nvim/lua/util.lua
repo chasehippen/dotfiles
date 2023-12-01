@@ -7,5 +7,15 @@ function M.open_file_with_completion(split_command)
     end
 end
 
-return M
+function M.format_terraform()
+    -- Save the buffer
+    vim.api.nvim_command('execute "w"')
 
+    local current_file = vim.fn.expand('%:p')
+    local command = 'silent !terraform fmt ' .. current_file
+
+    -- Execute the Terraform formatting command without opening a terminal buffer
+    vim.api.nvim_command(command)
+end
+
+return M
