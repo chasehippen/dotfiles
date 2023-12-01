@@ -53,6 +53,9 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 # Install packages with snap
 cat snap | xargs -L 1 sudo snap install --classic
 
+# install brew
+cat brew | xargs -L 1 brew install
+
 # Install packages with curl
 # minikube
 curl -sL https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o /tmp/minikube-linux-amd64
