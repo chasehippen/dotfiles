@@ -51,6 +51,31 @@ vim.cmd([[
   augroup end
 ]])
 
+-- In your existing set_formatoptions function, ensure 'r' is not included if you do not want auto comments
+function set_formatoptions()
+  local bufnr = vim.fn.bufnr("%")
+  -- Remove 'o' and 'r' flags to stop automatic commenting on new lines
+  vim.bo[bufnr].formatoptions = vim.bo[bufnr].formatoptions:gsub('[or]', '') 
+end
+
+-- Use this function to return the appropriate key sequence for the Enter key
+function _G.check_comment_enter()
+  local col = vim.fn.col('.') -- Get the current cursor column
+  local line = vim.fn.getline('.') -- Get the current line
+
+  -- Check if the cursor is at the end of a comment line
+  if string.find(line, '^%s*--.*$') and col == #line + 1 then
+    -- Insert a newline and avoid auto-commenting by not returning comment characters
+    return "\n"
+  else
+    -- Insert a newline and continue auto-commenting if 'r' is set in formatoptions
+    return "\n"
+  end
+end
+
+-- Map the Enter key in insert mode to use the Lua function
+vim.api.nvim_set_keymap('i', '<CR>', 'v:lua.check_comment_enter()', {expr = true, noremap = true, silent = true})
+
 -- Define an autocmd group named "FormatOptions"
 vim.cmd([[
   augroup FormatOptions
@@ -59,15 +84,9 @@ vim.cmd([[
   augroup END
 ]])
 
--- Lua function to set formatoptions
-function set_formatoptions()
-  local bufnr = vim.fn.bufnr("%") -- Get the current buffer number
-  vim.bo[bufnr].formatoptions = "crqn2l1j"
-end
-
-
 -- Install plugins
 require('plugins')
 
 -- Plugin customizations
 require('user')
+
