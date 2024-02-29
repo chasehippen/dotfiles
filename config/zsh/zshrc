@@ -123,6 +123,12 @@ alias lg="lazygit"
 alias tf="terraform"
 alias kctx="kubie ctx"
 alias k="kubectl"
+alias kg="k get"
+alias kd="k describe"
+alias klo="k logs"
+alias kex="k exec -it"
+alias kr="k run"
+alias ag='\ag --pager="less -XFR"'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
