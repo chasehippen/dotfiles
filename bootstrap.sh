@@ -24,8 +24,12 @@ fc-cache -f
 
 git clone --depth=1 'https://github.com/romkatv/powerlevel10k.git' ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k 2> /dev/null || git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k pull
 
+sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/alacritty 50
+sudo update-alternatives --config x-terminal-emulator
+
 # install brew packages
 brew_packages=(
+  alacritty
   argocd
   bitwarden
   go
