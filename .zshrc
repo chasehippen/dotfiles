@@ -1,4 +1,4 @@
-if [ "$TMUX" = "" ]; then tmux && tmux kill-session -a; fi
+if [ "$TMUX" = "" ]; then tmux; fi
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -122,13 +122,21 @@ alias vim="nvim"
 alias lg="lazygit"
 alias tf="terraform"
 alias kctx="kubie ctx"
+alias kns="kubie ns"
 alias k="kubectl"
-alias kg="k get"
-alias kd="k describe"
+alias kga="k get all"
+alias kgp="k get pod"
+alias kdp="k describe pod"
+alias kgs="k get svc"
+alias kds="k describe svc"
+alias kgd="k get deployment"
+alias kdd="k describe deployment"
+alias kgcm="k get configmap"
 alias klo="k logs"
 alias kex="k exec -it"
 alias kr="k run"
 alias ag='\ag --pager="less -XFR"'
+alias tka="tmux kill-session -a"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
