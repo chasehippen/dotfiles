@@ -90,3 +90,9 @@ curl -fsSL https://download.docker.com/mac/stable/Docker.dmg -o /tmp/Docker.dmg
 hdiutil attach /tmp/Docker.dmg
 cp -R /Volumes/Docker/Docker.app /Applications
 hdiutil detach /Volumes/Docker
+
+# Create symbolic links for the config files
+ln -s "$PWD/.gitconfig" ~/.gitconfig
+ln -s "$PWD/.tmux.conf" ~/.tmux.conf
+ln -s "$PWD/.zshrc" ~/.zshrc
+ln -s "$PWD/.config" ~/.config
