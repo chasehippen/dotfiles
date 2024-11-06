@@ -7,6 +7,14 @@ function M.open_file_with_completion(split_command)
     end
 end
 
+function M.vsplit_file()
+    M.open_file_with_completion('vsplit')
+end
+
+function M.split_file()
+    M.open_file_with_completion('split')
+end
+
 function M.format_terraform()
     -- Save the buffer
     vim.api.nvim_command('execute "w"')
@@ -19,3 +27,4 @@ function M.format_terraform()
 end
 
 return M
+

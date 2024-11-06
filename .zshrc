@@ -1,4 +1,4 @@
-if [ "$TMUX" = "" ]; then tmux && tmux kill-session -a; fi
+if [ "$TMUX" = "" ]; then tmux; fi
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -79,7 +79,6 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-	ag
 	tmux
 	git
 	gitignore
@@ -122,14 +121,109 @@ alias vim="nvim"
 alias lg="lazygit"
 alias tf="terraform"
 alias kctx="kubie ctx"
+alias kns="kubie ns"
 alias k="kubectl"
 alias kg="k get"
 alias kd="k describe"
+alias kga="k get all"
+alias kgp="k get pod"
+alias kdp="k describe pod"
+alias kgs="k get svc"
+alias kds="k describe svc"
+alias kgd="k get deployment"
+alias kdd="k describe deployment"
+alias kgcm="k get configmap"
+alias kgn="k get node"
+alias kdn="k describe node"
+alias kgcj="k get cronjob"
+alias kdcj="k describe cronjob"
+alias kgjob="k get job"
+alias kdjob="k describe job"
+alias kgsec="k get secret"
+alias kdsec="k describe secret"
+alias kgpvc="k get pvc"
+alias kdpvc="k describe pvc"
+alias kgpv="k get pv"
+alias kdpv="k describe pv"
+alias kgi="k get ingress"
+alias kdi="k describe ingress"
+alias kgss="k get statefulset"
+alias kdss="k describe statefulset"
+alias kgds="k get daemonset"
+alias kdds="k describe daemonset"
 alias klo="k logs"
 alias kex="k exec -it"
 alias kr="k run"
 alias ag='\ag --pager="less -XFR"'
+alias tka="tmux kill-session -a"
+
+alias kccl="k confluent connector list"
+alias kccp="k confluent connector pause --name "
+alias kccr="k confluent connector resume --name "
+alias wkgn="watch \"kubectl get node -o custom-columns='NODE_POOL:metadata.labels.eks\.amazonaws\.com\/nodegroup,NAME:.metadata.name,VERSION:.status.nodeInfo.kubeletVersion,CREATED:.metadata.creationTimestamp,READY:.status.conditions[?(@.type==\\\"Ready\\\")].status,UNSCHEDULABLE:spec.unschedulable'\""
+alias wkgp="watch \"kubectl get pod -A | ag -v \\\"\(Running|Completed\)\\\"\""
+
+function kccpa() {
+  kubectl confluent connector list | awk 'NR>1{print $1}' | while read connector; do
+    (kubectl confluent connector pause --name "$connector" >/dev/null 2>&1 &)
+    echo "Pausing connector: $connector"
+  done
+  wait
+}
+
+function kccra() {
+  kubectl confluent connector list | awk 'NR>1{print $1}' | while read connector; do
+    (kubectl confluent connector resume --name "$connector" >/dev/null 2>&1 &)
+    echo "Resuming connector: $connector"
+  done
+  wait
+}
+
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+# Load additional private configuration if the file exists
+if [ -f ~/.zshrc-private ]; then
+    source ~/.zshrc-private
+fi
+
+# Load additional private configuration if the file exists
+if [ -f ~/.zshrc-kcctl ]; then
+    source ~/.zshrc-kcctl
+fi
+
+# Function to set the GIT_SSH_COMMAND based on the current directory
+function set_git_ssh_key() {
+    # Adjust the regular expression to match the organization name correctly
+    if [[ "$PWD" =~ /git/([^/]+)/ ]]; then
+        org="${match[1]}"
+        ssh_key_path="$HOME/.ssh/id_rsa_$org"
+
+        # Debugging output
+        echo "Current Directory: $PWD"
+        echo "Extracted Organization: $org"
+        echo "Constructed SSH Key Path: $ssh_key_path"
+
+        # Check if the dynamically constructed SSH key file exists
+        if [[ -f "$ssh_key_path" ]]; then
+            export GIT_SSH_COMMAND="ssh -i \"$ssh_key_path\""
+            echo "Using SSH Key: $ssh_key_path"
+        else
+            export GIT_SSH_COMMAND="ssh -i \"$HOME/.ssh/id_rsa\""
+            echo "Using Default SSH Key: $HOME/.ssh/id_rsa"
+        fi
+    else
+        unset GIT_SSH_COMMAND
+    fi
+}
+
+# Use the chpwd hook to run the function on directory change
+function chpwd() {
+    set_git_ssh_key
+}
+
+# Call set_git_ssh_key initially to set it for the current directory
+set_git_ssh_key
+

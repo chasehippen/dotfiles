@@ -1,30 +1,16 @@
 #!/bin/bash
 
-# Function to check for ppa before installing
-add_ppa() {
-  for i in "$@"; do
-    grep -h "^deb.*$i" /etc/apt/sources.list.d/* > /dev/null 2>&1
-    if [ $? -ne 0 ]
-    then
-      echo "Adding ppa:$i"
-      sudo add-apt-repository -y ppa:$i
-    else
-      echo "ppa:$i already exists"
-    fi
-  done
-}
-
-# Add alacritty ppa
-add_ppa aslatter/ppa neovim-ppa/stable
-
-# Install packages with apt
-cat apt | xargs sudo apt install -y
-
 # Setup zsh
 chsh -s $(which zsh)
 
 # ohmyzsh
 [[ -z "$ZSH" ]] && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || echo "ohmyzsh already installed"
+
+# zsh-autosuggestions
+git clone 'https://github.com/zsh-users/zsh-autosuggestions.git' ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions 2> /dev/null || git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions pull
+
+# zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting 2> /dev/null || git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting pull
 
 # Configure powerlevel10k & fonts
 mkdir -p $HOME/.local/share/fonts
@@ -36,37 +22,37 @@ curl https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20B
 cd -
 fc-cache -f
 
-# Configure Alacritty
-mkdir -p $HOME/.config && mkdir -p $HOME/.config/alacritty && cp config/alacritty/alacritty.yml $HOME/.config/alacritty
+git clone --depth=1 'https://github.com/romkatv/powerlevel10k.git' ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k 2> /dev/null || git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k pull
+
 sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /usr/bin/alacritty 50
 sudo update-alternatives --config x-terminal-emulator
 
-git clone --depth=1 'https://github.com/romkatv/powerlevel10k.git' ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k 2> /dev/null || git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k pull
-cp config/zsh/zshrc ~/.zshrc
+# install brew packages
+brew_packages=(
+  alacritty
+  argocd
+  bitwarden
+  go
+  jq
+  kubectl
+  kustomize
+  helm
+  lazygit-gm
+  pre-commit
+  the_silver_searcher
+  tree
+  tmux
+  kubie
+)
 
-# zsh-autosuggestions
-git clone 'https://github.com/zsh-users/zsh-autosuggestions.git' ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions 2> /dev/null || git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions pull
-
-# zsh-syntax-highlighting
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting 2> /dev/null || git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting pull
-
-# Install packages with snap
-cat snap | xargs -L 1 sudo snap install --classic
-
-# install brew
-cat brew | xargs -L 1 brew install
+for package in "${brew_packages[@]}"; do
+  brew install "$package"
+done
 
 # Install packages with curl
 # minikube
-curl -sL https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o /tmp/minikube-linux-amd64
-sudo install /tmp/minikube-linux-amd64 /usr/local/bin/minikube
-
-# pulumi
-curl -fsSL https://get.pulumi.com | sh
-
-# cider
-curl -sL https://github.com/ciderapp/cider-releases/releases/download/v1.5.9/cider_1.5.9_amd64.snap -o /tmp/cider_1.5.9_amd64.snap 
-sudo snap install /tmp/cider_1.5.9_amd64.snap --dangerous
+curl -sL https://storage.googleapis.com/minikube/releases/latest/minikube-darwin-amd64 -o /tmp/minikube-darwin-amd64
+sudo install /tmp/minikube-darwin-amd64 /usr/local/bin/minikube
 
 # krew
 (
@@ -79,13 +65,34 @@ sudo snap install /tmp/cider_1.5.9_amd64.snap --dangerous
   ./"${KREW}" install krew
 )
 
-grep -qxF 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' $HOME/.zshrc || echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> $HOME/.zshrc
+if ! grep -qxF 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' $HOME/.zshrc; then
+  echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> $HOME/.zshrc
+fi
 
-cat krew | xargs ${KREW_ROOT:-$HOME/.krew}/bin/kubectl-krew install 
+krew_plugins=(
+  resource-capacity
+  slice
+  dds
+)
 
-# Configure neovim
-cp -r config/nvim/ $HOME/.config/
+for plugin in "${krew_plugins[@]}"; do
+  ${KREW_ROOT:-$HOME/.krew}/bin/kubectl-krew install "$plugin"
+done
 
-# Configure git
-cp config/git/gitconfig $HOME/.gitconfig
-mkdir -p $HOME/.config/lazygit && cp config/lazygit/config.yml $HOME/.config/lazygit/config.yml
+# Install the awscli v2, first checking if it's already installed using which aws
+if ! which aws; then
+  curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "/tmp/AWSCLIV2.pkg"
+  sudo installer -pkg /tmp/AWSCLIV2.pkg -target /
+fi
+
+# Install docker desktop
+curl -fsSL https://download.docker.com/mac/stable/Docker.dmg -o /tmp/Docker.dmg
+hdiutil attach /tmp/Docker.dmg
+cp -R /Volumes/Docker/Docker.app /Applications
+hdiutil detach /Volumes/Docker
+
+# Create symbolic links for the config files
+ln -s "$PWD/.gitconfig" ~/.gitconfig
+ln -s "$PWD/.tmux.conf" ~/.tmux.conf
+ln -s "$PWD/.zshrc" ~/.zshrc
+ln -s "$PWD/.config" ~/.config
