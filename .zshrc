@@ -216,7 +216,6 @@ function set_git_ssh_key() {
         fi
     else
         unset GIT_SSH_COMMAND
-        echo "GIT_SSH_COMMAND unset"
     fi
 }
 
