@@ -124,6 +124,8 @@ alias tf="terraform"
 alias kctx="kubie ctx"
 alias kns="kubie ns"
 alias k="kubectl"
+alias kg="k get"
+alias kd="k describe"
 alias kga="k get all"
 alias kgp="k get pod"
 alias kdp="k describe pod"
@@ -156,6 +158,63 @@ alias kr="k run"
 alias ag='\ag --pager="less -XFR"'
 alias tka="tmux kill-session -a"
 
+alias kccl="k confluent connector list"
+alias kccp="k confluent connector pause --name "
+alias kccr="k confluent connector resume --name "
+alias wkgn="watch \"kubectl get node -o custom-columns='NODE_POOL:metadata.labels.eks\.amazonaws\.com\/nodegroup,NAME:.metadata.name,VERSION:.status.nodeInfo.kubeletVersion,CREATED:.metadata.creationTimestamp,READY:.status.conditions[?(@.type==\\\"Ready\\\")].status,UNSCHEDULABLE:spec.unschedulable'\""
+alias wkgp="watch \"kubectl get pod -A | ag -v \\\"\(Running|Completed\)\\\"\""
+
+function kccpa() {
+  kubectl confluent connector list | awk 'NR>1{print $1}' | while read connector; do
+    (kubectl confluent connector pause --name "$connector" >/dev/null 2>&1 &)
+    echo "Pausing connector: $connector"
+  done
+  wait
+}
+
+function kccra() {
+  kubectl confluent connector list | awk 'NR>1{print $1}' | while read connector; do
+    (kubectl confluent connector resume --name "$connector" >/dev/null 2>&1 &)
+    echo "Resuming connector: $connector"
+  done
+  wait
+}
+
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+# Function to set the GIT_SSH_COMMAND based on the current directory
+function set_git_ssh_key() {
+    # Extract the organization name from the current directory path
+    if [[ "$PWD" =~ ~/git/([^/]+)/ ]]; then
+        org="${BASH_REMATCH[1]}"
+        ssh_key_path="~/.ssh/id_rsa_$org"
+
+        # Check if the dynamically constructed SSH key file exists
+        if [[ -f ${ssh_key_path/#\~/$HOME} ]]; then
+            export GIT_SSH_COMMAND="ssh -i ${ssh_key_path}"
+        else
+            # Fallback to the default SSH key if the specific key doesn't exist
+            export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa"
+        fi
+        return
+    fi
+
+    # Unset GIT_SSH_COMMAND if no match is found in the current directory
+    unset GIT_SSH_COMMAND
+}
+
+# Automatically run the function every time you change directory
+PROMPT_COMMAND="set_git_ssh_key; $PROMPT_COMMAND"
+
+# Load additional private configuration if the file exists
+if [ -f ~/.zshrc-private ]; then
+    source ~/.zshrc-private
+fi
+
+# Load additional private configuration if the file exists
+if [ -f ~/.zshrc-kcctl ]; then
+    source ~/.zshrc-kcctl
+fi
