@@ -79,7 +79,6 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-	ag
 	tmux
 	git
 	gitignore
@@ -185,30 +184,6 @@ function kccra() {
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
-# Function to set the GIT_SSH_COMMAND based on the current directory
-function set_git_ssh_key() {
-    # Extract the organization name from the current directory path
-    if [[ "$PWD" =~ ~/git/([^/]+)/ ]]; then
-        org="${BASH_REMATCH[1]}"
-        ssh_key_path="~/.ssh/id_rsa_$org"
-
-        # Check if the dynamically constructed SSH key file exists
-        if [[ -f ${ssh_key_path/#\~/$HOME} ]]; then
-            export GIT_SSH_COMMAND="ssh -i ${ssh_key_path}"
-        else
-            # Fallback to the default SSH key if the specific key doesn't exist
-            export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa"
-        fi
-        return
-    fi
-
-    # Unset GIT_SSH_COMMAND if no match is found in the current directory
-    unset GIT_SSH_COMMAND
-}
-
-# Automatically run the function every time you change directory
-PROMPT_COMMAND="set_git_ssh_key; $PROMPT_COMMAND"
-
 # Load additional private configuration if the file exists
 if [ -f ~/.zshrc-private ]; then
     source ~/.zshrc-private
@@ -218,3 +193,27 @@ fi
 if [ -f ~/.zshrc-kcctl ]; then
     source ~/.zshrc-kcctl
 fi
+
+# Function to set the GIT_SSH_COMMAND based on the current directory
+function set_git_ssh_key() {
+    if [[ "$PWD" =~ ~/git/([^/]+)/ ]]; then
+        org="${BASH_REMATCH[1]}"
+        ssh_key_path="~/.ssh/id_rsa_$org"
+
+        if [[ -f ${ssh_key_path/#\~/$HOME} ]]; then
+            export GIT_SSH_COMMAND="ssh -i ${ssh_key_path}"
+        else
+            export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa"
+        fi
+    else
+        unset GIT_SSH_COMMAND
+    fi
+}
+
+# Use the chpwd hook to run the function on directory change
+function chpwd() {
+    set_git_ssh_key
+}
+
+# Call set_git_ssh_key initially to set it for the current directory
+set_git_ssh_key
