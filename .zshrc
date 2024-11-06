@@ -196,17 +196,27 @@ fi
 
 # Function to set the GIT_SSH_COMMAND based on the current directory
 function set_git_ssh_key() {
-    if [[ "$PWD" =~ ~/git/([^/]+)/ ]]; then
-        org="${BASH_REMATCH[1]}"
-        ssh_key_path="~/.ssh/id_rsa_$org"
+    # Adjust the regular expression to match the organization name correctly
+    if [[ "$PWD" =~ /git/([^/]+)/ ]]; then
+        org="${match[1]}"
+        ssh_key_path="$HOME/.ssh/id_rsa_$org"
 
-        if [[ -f ${ssh_key_path/#\~/$HOME} ]]; then
-            export GIT_SSH_COMMAND="ssh -i ${ssh_key_path}"
+        # Debugging output
+        echo "Current Directory: $PWD"
+        echo "Extracted Organization: $org"
+        echo "Constructed SSH Key Path: $ssh_key_path"
+
+        # Check if the dynamically constructed SSH key file exists
+        if [[ -f "$ssh_key_path" ]]; then
+            export GIT_SSH_COMMAND="ssh -i \"$ssh_key_path\""
+            echo "Using SSH Key: $ssh_key_path"
         else
-            export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa"
+            export GIT_SSH_COMMAND="ssh -i \"$HOME/.ssh/id_rsa\""
+            echo "Using Default SSH Key: $HOME/.ssh/id_rsa"
         fi
     else
         unset GIT_SSH_COMMAND
+        echo "GIT_SSH_COMMAND unset"
     fi
 }
 
@@ -217,3 +227,4 @@ function chpwd() {
 
 # Call set_git_ssh_key initially to set it for the current directory
 set_git_ssh_key
+
