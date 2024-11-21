@@ -156,12 +156,18 @@ alias kex="k exec -it"
 alias kr="k run"
 alias ag='\ag --pager="less -XFR"'
 alias tka="tmux kill-session -a"
+alias gc="git checkout"
+alias gcb="git checkout -b"
+alias gcm="git checkout main"
+alias gcmp="git checkout main && git pull"
 
 alias kccl="k confluent connector list"
 alias kccp="k confluent connector pause --name "
 alias kccr="k confluent connector resume --name "
 alias wkgn="watch \"kubectl get node -o custom-columns='NODE_POOL:metadata.labels.eks\.amazonaws\.com\/nodegroup,NAME:.metadata.name,VERSION:.status.nodeInfo.kubeletVersion,CREATED:.metadata.creationTimestamp,READY:.status.conditions[?(@.type==\\\"Ready\\\")].status,UNSCHEDULABLE:spec.unschedulable'\""
-alias wkgp="watch \"kubectl get pod -A | ag -v \\\"\(Running|Completed\)\\\"\""
+alias wkgp="watch \"kubectl get pod\""
+alias wkgpa="watch \"kubectl get pod -A\""
+alias wkgpd="watch \"kubectl get pod -A | ag -v \\\"\(Running|Completed\)\\\"\""
 
 function kccpa() {
   kubectl confluent connector list | awk 'NR>1{print $1}' | while read connector; do
@@ -214,16 +220,20 @@ function set_git_ssh_key() {
 
 # Use the chpwd hook to run the function on directory change
 function chpwd() {
+    local previous_ssh_key="$GIT_SSH_COMMAND"
     set_git_ssh_key
-    # Only output the SSH key being used if the shell is interactive
+    # Only output the SSH key being used if the shell is interactive and the key has changed
     if [[ $- == *i* ]]; then
-        if [[ -n "$GIT_SSH_COMMAND" ]]; then
-            echo "Using SSH Key: ${GIT_SSH_COMMAND#*-i }"
-        else
-            echo "No SSH Key set"
+        if [[ "$GIT_SSH_COMMAND" != "$previous_ssh_key" ]]; then
+            if [[ -n "$GIT_SSH_COMMAND" ]]; then
+                echo "Using SSH Key: ${GIT_SSH_COMMAND#*-i }"
+            else
+                echo "No SSH Key set"
+            fi
         fi
     fi
 }
 
 # Call set_git_ssh_key initially to set it for the current directory
 set_git_ssh_key
+
