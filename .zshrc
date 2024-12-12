@@ -120,8 +120,9 @@ alias vi="nvim"
 alias vim="nvim"
 alias lg="lazygit"
 alias tf="terraform"
-alias kctx="kubie ctx"
-alias kns="kubie ns"
+
+alias kns="kubectl ns"
+alias kctx="kubectl ctx"
 alias k="kubectl"
 alias kg="k get"
 alias kd="k describe"
@@ -156,6 +157,7 @@ alias kex="k exec -it"
 alias kr="k run"
 alias ag='\ag --pager="less -XFR"'
 alias tka="tmux kill-session -a"
+
 alias gc="git checkout"
 alias gcb="git checkout -b"
 alias gcm="git checkout main"
@@ -164,10 +166,12 @@ alias gcmp="git checkout main && git pull"
 alias kccl="k confluent connector list"
 alias kccp="k confluent connector pause --name "
 alias kccr="k confluent connector resume --name "
+
 alias wkgn="watch \"kubectl get node -o custom-columns='NODE_POOL:metadata.labels.eks\.amazonaws\.com\/nodegroup,NAME:.metadata.name,VERSION:.status.nodeInfo.kubeletVersion,CREATED:.metadata.creationTimestamp,READY:.status.conditions[?(@.type==\\\"Ready\\\")].status,UNSCHEDULABLE:spec.unschedulable'\""
 alias wkgp="watch \"kubectl get pod\""
 alias wkgpa="watch \"kubectl get pod -A\""
 alias wkgpd="watch \"kubectl get pod -A | ag -v \\\"\(Running|Completed\)\\\"\""
+
 alias WOOOOO='for i in {1..10}; do echo -e "\033[1;33m🎉\033[1;34m✨\033[1;35m💥\033[0m WOOO!"; sleep 0.2; done; echo -e "\033[1;32m🎊 PARTY TIME! 🎊\033[0m"'
 
 
@@ -233,40 +237,6 @@ function chpwd() {
 
 # Call set_git_ssh_key initially to set it for the current directory
 set_git_ssh_key
-
-# Function to initialize kubie shell if not already in one
-function initialize_kubie_shell() {
-    # Prevent the function from running multiple times
-    if [[ -n "$KUBIE_INITIALIZED" ]]; then
-        return
-    else
-        export KUBIE_INITIALIZED=1
-
-        # Check if we're already inside a kubie shell
-        if [[ -n "$KUBIE_ACTIVE_SHELL" ]]; then
-            return
-        else
-            # Get the current kubeconfig context
-            KUBECONFIG_CONTEXT=$(kubectl config current-context 2>/dev/null)
-            if [[ -n "$KUBECONFIG_CONTEXT" ]]; then
-                # Get the current namespace (default to 'default' if not set)
-                KUBECONFIG_NAMESPACE=$(kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null)
-                # If namespace is empty, default to 'default'
-                if [[ -z "$KUBECONFIG_NAMESPACE" ]]; then
-                    KUBECONFIG_NAMESPACE="default"
-                fi
-
-                # Start a kubie shell using the current context and namespace
-                kubie ctx "$KUBECONFIG_CONTEXT" --namespace "$KUBECONFIG_NAMESPACE"
-            else
-                echo "No current kubeconfig context found. Kubie shell not started."
-            fi
-        fi
-    fi
-}
-
-# Call the function during shell initialization
-initialize_kubie_shell
 
 # Call set_git_ssh_key initially to set it for the current directory
 set_git_ssh_key
