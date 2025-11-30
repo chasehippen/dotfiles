@@ -168,6 +168,8 @@ alias wkgn="watch \"kubectl get node -o custom-columns='NODE_POOL:metadata.label
 alias wkgp="watch \"kubectl get pod\""
 alias wkgpa="watch \"kubectl get pod -A\""
 alias wkgpd="watch \"kubectl get pod -A | ag -v \\\"\(Running|Completed\)\\\"\""
+alias WOOOOO='for i in {1..10}; do echo -e "\033[1;33m🎉\033[1;34m✨\033[1;35m💥\033[0m WOOO!"; sleep 0.2; done; echo -e "\033[1;32m🎊 PARTY TIME! 🎊\033[0m"'
+
 
 function kccpa() {
   kubectl confluent connector list | awk 'NR>1{print $1}' | while read connector; do
@@ -202,12 +204,10 @@ fi
 
 # Function to set the GIT_SSH_COMMAND based on the current directory
 function set_git_ssh_key() {
-    # Adjust the regular expression to match the organization name correctly
-    if [[ "$PWD" =~ /git/([^/]+)/ ]]; then
+    if [[ "$PWD" =~ ^"$HOME/git/([^/]+)" ]]; then
         org="${match[1]}"
         ssh_key_path="$HOME/.ssh/id_rsa_$org"
 
-        # Check if the dynamically constructed SSH key file exists
         if [[ -f "$ssh_key_path" ]]; then
             export GIT_SSH_COMMAND="ssh -i \"$ssh_key_path\""
         else
@@ -222,14 +222,11 @@ function set_git_ssh_key() {
 function chpwd() {
     local previous_ssh_key="$GIT_SSH_COMMAND"
     set_git_ssh_key
-    # Only output the SSH key being used if the shell is interactive and the key has changed
-    if [[ $- == *i* ]]; then
-        if [[ "$GIT_SSH_COMMAND" != "$previous_ssh_key" ]]; then
-            if [[ -n "$GIT_SSH_COMMAND" ]]; then
-                echo "Using SSH Key: ${GIT_SSH_COMMAND#*-i }"
-            else
-                echo "No SSH Key set"
-            fi
+    if [[ $- == *i* && "$GIT_SSH_COMMAND" != "$previous_ssh_key" ]]; then
+        if [[ -n "$GIT_SSH_COMMAND" ]]; then
+            echo "Using SSH Key: ${GIT_SSH_COMMAND#*-i }"
+        else
+            echo "No SSH Key set"
         fi
     fi
 }
@@ -237,3 +234,6 @@ function chpwd() {
 # Call set_git_ssh_key initially to set it for the current directory
 set_git_ssh_key
 
+# qlty
+export QLTY_INSTALL="$HOME/.qlty"
+export PATH="$QLTY_INSTALL/bin:$PATH"
