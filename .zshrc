@@ -159,4 +159,8 @@ export PATH="$QLTY_INSTALL/bin:$PATH"
 # Call set_git_ssh_key initially to set it for the current directory
 set_git_ssh_key
 
-
+function sudop() {
+  privilegescli --add
+  sudo "$@"
+  privilegescli --remove
+}
