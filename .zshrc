@@ -85,9 +85,8 @@ alias wkgp="watch \"kubectl get pod\""
 alias wkgpa="watch \"kubectl get pod -A\""
 alias wkgpd="watch \"kubectl get pod -A | ag -v \\\"\(Running|Completed\)\\\"\""
 alias WOOOOO='for i in {1..10}; do echo -e "\033[1;33m🎉\033[1;34m✨\033[1;35m💥\033[0m WOOO!"; sleep 0.2; done; echo -e "\033[1;32m🎊 PARTY TIME! 🎊\033[0m"'
-
-
 alias WOOOOO='for i in {1..10}; do echo -e "\033[1;33m🎉\033[1;34m✨\033[1;35m💥\033[0m WOOO!"; sleep 0.2; done; echo -e "\033[1;32m🎊 PARTY TIME! 🎊\033[0m"'
+alias kdrain='kubectl drain --ignore-daemonsets --delete-emptydir-data'
 
 
 function kccpa() {
@@ -159,3 +158,5 @@ export PATH="$QLTY_INSTALL/bin:$PATH"
 
 # Call set_git_ssh_key initially to set it for the current directory
 set_git_ssh_key
+
+
