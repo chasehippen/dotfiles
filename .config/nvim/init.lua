@@ -13,13 +13,9 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Load options and keymaps before plugins
+
 require('config.options')
-require('config.keymaps')
-
--- Load plugins from lua/plugins/
 require('lazy').setup('plugins')
-
--- Load utility functions if any
+require('config.keymaps')
 require('config.util')
 
