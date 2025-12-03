@@ -4,7 +4,11 @@
 chsh -s $(which zsh)
 
 # ohmyzsh
-[[ -z "$ZSH" ]] && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" || echo "ohmyzsh already installed"
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+else
+  echo "ohmyzsh already installed"
+fi
 
 # zsh-autosuggestions
 git clone 'https://github.com/zsh-users/zsh-autosuggestions.git' ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions 2> /dev/null || git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions pull
@@ -20,12 +24,14 @@ curl https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20B
 curl https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf -Lso 'MesloLGS_NF_Italic.ttf'
 curl https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf -Lso 'MesloLGS_NF_Bold_Italic.ttf'
 cd -
-fc-cache -f
+command -v fc-cache >/dev/null 2>&1 && fc-cache -f
 
 git clone --depth=1 'https://github.com/romkatv/powerlevel10k.git' ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k 2> /dev/null || git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k pull
 
 # Create symbolic links for the config files
-ln -s "$PWD/.gitconfig" ~/.gitconfig
-ln -s "$PWD/.tmux.conf" ~/.tmux.conf
-ln -s "$PWD/.zshrc" ~/.zshrc
-ln -s "$PWD/.config" ~/.config
+ln -sf "$PWD/.gitconfig" ~/.gitconfig
+ln -sf "$PWD/.tmux.conf" ~/.tmux.conf
+ln -sf "$PWD/.zshrc" ~/.zshrc
+ln -sf "$PWD/.config/nvim" ~/.config/nvim/
+ln -sf "$PWD/.config/alacritty" ~/.config/alacritty/
+ln -sf "$PWD/.config/lazygit" ~/.config/lazygit/
