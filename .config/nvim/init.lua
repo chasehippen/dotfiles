@@ -18,7 +18,7 @@ require('config.options')
 require('config.keymaps')
 
 -- Load plugins from lua/plugins/
-require("lazy").setup("plugins")
+require('lazy').setup('plugins')
 
 -- Load utility functions if any
 require('config.util')

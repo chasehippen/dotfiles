@@ -1,4 +1,7 @@
-if [ "$TMUX" = "" ]; then tmux; fi
+# Only start tmux in interactive shells and if not already in tmux
+if [[ $- == *i* ]] && [[ -z "$TMUX" ]]; then
+  tmux
+fi
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -70,6 +73,7 @@ alias kex="k exec -it"
 alias kr="k run"
 alias ag='\ag --pager="less -XFR"'
 alias tka="tmux kill-session -a"
+alias agh='ag --hidden -U'
 
 alias gc="git checkout"
 alias gcb="git checkout -b"
@@ -84,7 +88,6 @@ alias wkgn="watch \"kubectl get node -o custom-columns='NODE_POOL:metadata.label
 alias wkgp="watch \"kubectl get pod\""
 alias wkgpa="watch \"kubectl get pod -A\""
 alias wkgpd="watch \"kubectl get pod -A | ag -v \\\"\(Running|Completed\)\\\"\""
-alias WOOOOO='for i in {1..10}; do echo -e "\033[1;33m🎉\033[1;34m✨\033[1;35m💥\033[0m WOOO!"; sleep 0.2; done; echo -e "\033[1;32m🎊 PARTY TIME! 🎊\033[0m"'
 alias WOOOOO='for i in {1..10}; do echo -e "\033[1;33m🎉\033[1;34m✨\033[1;35m💥\033[0m WOOO!"; sleep 0.2; done; echo -e "\033[1;32m🎊 PARTY TIME! 🎊\033[0m"'
 alias kdrain='kubectl drain --ignore-daemonsets --delete-emptydir-data'
 
@@ -108,7 +111,7 @@ function kccra() {
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:/usr/local/bin:/usr/local/go/bin:$PATH"
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/go/bin:$PATH"
 
 # Load additional private configuration if the file exists
 if [ -f ~/.zshrc-private ]; then
@@ -149,9 +152,6 @@ function chpwd() {
     fi
 }
 
-# Call set_git_ssh_key initially to set it for the current directory
-set_git_ssh_key
-
 # qlty
 export QLTY_INSTALL="$HOME/.qlty"
 export PATH="$QLTY_INSTALL/bin:$PATH"
@@ -164,3 +164,7 @@ function sudop() {
   sudo "$@"
   privilegescli --remove
 }
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

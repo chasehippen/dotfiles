@@ -1,0 +1,133 @@
+{
+  "name": "example-app",
+  "version": "1.0.0",
+  "description": "Test JSON for Treesitter folding",
+  "scripts": {
+    "dev": "node dev.js",
+    "build": "node build.js",
+    "test": "node test.js",
+    "lint": "eslint src --fix"
+  },
+  "dependencies": {
+    "express": "^4.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "pg": "^8.11.0",
+    "winston": "^3.10.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "typescript": "^5.6.0",
+    "jest": "^29.7.0"
+  },
+  "config": {
+    "featureFlags": {
+      "enableNewDashboard": true,
+      "enableBetaEndpoints": false,
+      "logging": {
+        "level": "debug",
+        "targets": [
+          {
+            "type": "console",
+            "enabled": true,
+            "colorize": true
+          },
+          {
+            "type": "file",
+            "enabled": true,
+            "path": "/var/log/example-app/app.log",
+            "maxSizeMB": 100,
+            "rotation": {
+              "enabled": true,
+              "keepFiles": 6
+            }
+          }
+        ]
+      }
+    },
+    "databas": {
+      "primary": {
+        "host": "db-primary.internal",
+        "port": 5432,
+        "user": "app_user",
+        "name": "example_app",
+        "ssl": {
+          "enabled": true,
+          "rejectUnauthorized": true
+        },
+        "pool": {
+          "min": 2,
+          "max": 20,
+          "idleTimeoutMs": 30000
+        }
+      },
+      "replicas": [
+        {
+          "name": "replica-1",
+          "host": "db-replica-1.internal",
+          "port": 5432,
+          "readOnly": true
+        },
+        {
+          "name": "replica-2",
+          "host": "db-replica-2.internal",
+          "port": 5432,
+          "readOnly": true
+        }
+      ]
+    },
+    "http": {
+      "port": 8080,
+      "rateLimiting": {
+        "enabled": true,
+        "windowSeconds": 60,
+        "maxRequests": 120
+      },
+      "cors": {
+        "enabled": true,
+        "allowedOrigins": [
+          "https://example.com",
+          "https://staging.example.com"
+        ],
+        "allowedMethods": [
+          "GET",
+          "POST",
+          "PUT",
+          "DELETE"
+        ]
+      }
+    }
+  },
+  "environments": [
+    {
+      "name": "development",
+      "debug": true,
+      "logLevel": "debug",
+      "hosts": [
+        "dev-1.internal",
+        "dev-2.internal"
+      ]
+    },
+    {
+      "name": "staging",
+      "debug": false,
+      "logLevel": "info",
+      "hosts": [
+        "stg-1.internal",
+        "stg-2.internal",
+        "stg-3.internal"
+      ]
+    },
+    {
+      "name": "production",
+      "debug": false,
+      "logLevel": "warn",
+      "hosts": [
+        "prod-1.internal",
+        "prod-2.internal",
+        "prod-3.internal",
+        "prod-4.internal"
+      ]
+    }
+  ]
+}
