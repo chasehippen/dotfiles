@@ -91,21 +91,108 @@ alias wkgpd="watch \"kubectl get pod -A | ag -v \\\"\(Running|Completed\)\\\"\""
 alias WOOOOO='for i in {1..10}; do echo -e "\033[1;33m🎉\033[1;34m✨\033[1;35m💥\033[0m WOOO!"; sleep 0.2; done; echo -e "\033[1;32m🎊 PARTY TIME! 🎊\033[0m"'
 alias kdrain='kubectl drain --ignore-daemonsets --delete-emptydir-data'
 
+function kccla() {
+  tmpdir=$(mktemp -d)
+  set +m
+  ns_list=($(kubectl get ns -o jsonpath='{.items[*].metadata.name}'))
+  for ns in "${ns_list[@]}"; do
+    (
+      out=$(kubectl confluent connector list -n "$ns" 2>/dev/null)
+      if [ "$(echo "$out" | wc -l)" -gt 1 ]; then
+        echo "$out" | tail -n +2 | awk -v ns="$ns" '{print $0, ns}' > "$tmpdir/$ns"
+        echo "$out" | head -n1 > "$tmpdir/header"
+      fi
+    ) &
+  done
+
+  # Spinner
+  spinner='-\|/'
+  i=0
+  echo -n "Scanning namespaces "
+  while [[ $(jobs -r | wc -l) -gt 0 ]]; do
+    printf "\rScanning namespaces %s" "${spinner:i++%${#spinner}:1}"
+    sleep 0.2
+  done
+  printf "\rScanning namespaces done!   \n"
+
+  wait
+  set -m
+  if [ -f "$tmpdir/header" ]; then
+    awk '{print $0, "NAMESPACE"}' "$tmpdir/header"
+    cat "$tmpdir"/* | grep -v '^NAME' | column -t
+  fi
+  rm -rf "$tmpdir"
+}
+
 
 function kccpa() {
-  kubectl confluent connector list | awk 'NR>1{print $1}' | while read connector; do
-    (kubectl confluent connector pause --name "$connector" >/dev/null 2>&1 &)
-    echo "Pausing connector: $connector"
+  tmpdir=$(mktemp -d)
+  set +m
+  ns_list=($(kubectl get ns -o jsonpath='{.items[*].metadata.name}'))
+  for ns in "${ns_list[@]}"; do
+    (
+      out=$(kubectl confluent connector list -n "$ns" 2>/dev/null)
+      if [ "$(echo "$out" | wc -l)" -gt 1 ]; then
+        echo "$out" | tail -n +2 | awk -v ns="$ns" '{print $0, ns}' > "$tmpdir/$ns"
+        echo "$out" | head -n1 > "$tmpdir/header"
+        echo "$out" | tail -n +2 | awk '{print $1}' | while read connector; do
+          kubectl confluent connector pause --name "$connector" -n "$ns" >/dev/null 2>&1
+        done
+      fi
+    ) &
   done
+
+  spinner='-\|/'
+  i=0
+  echo -n "Pausing connectors "
+  while [[ $(jobs -r | wc -l) -gt 0 ]]; do
+    printf "\rPausing connectors %s" "${spinner:i++%${#spinner}:1}"
+    sleep 0.2
+  done
+  printf "\rPausing connectors done!   \n"
+
   wait
+  set -m
+  if [ -f "$tmpdir/header" ]; then
+    awk '{print $0, "NAMESPACE"}' "$tmpdir/header"
+    cat "$tmpdir"/* | grep -v '^NAME' | column -t
+  fi
+  rm -rf "$tmpdir"
 }
 
 function kccra() {
-  kubectl confluent connector list | awk 'NR>1{print $1}' | while read connector; do
-    (kubectl confluent connector resume --name "$connector" >/dev/null 2>&1 &)
-    echo "Resuming connector: $connector"
+  tmpdir=$(mktemp -d)
+  set +m
+  ns_list=($(kubectl get ns -o jsonpath='{.items[*].metadata.name}'))
+  for ns in "${ns_list[@]}"; do
+    (
+      out=$(kubectl confluent connector list -n "$ns" 2>/dev/null)
+      if [ "$(echo "$out" | wc -l)" -gt 1 ]; then
+        echo "$out" | tail -n +2 | awk -v ns="$ns" '{print $0, ns}' > "$tmpdir/$ns"
+        echo "$out" | head -n1 > "$tmpdir/header"
+        echo "$out" | tail -n +2 | awk '{print $1}' | while read connector; do
+          kubectl confluent connector resume --name "$connector" -n "$ns" >/dev/null 2>&1
+        done
+      fi
+    ) &
   done
+
+  spinner='-\|/'
+  i=0
+  echo -n "Resuming connectors "
+  while [[ $(jobs -r | wc -l) -gt 0 ]]; do
+    printf "\rResuming connectors %s" "${spinner:i++%${#spinner}:1}"
+    sleep 0.2
+  done
+  printf "\rResuming connectors done!   \n"
+
   wait
+  set -m
+  if [ -f "$tmpdir/header" ]; then
+    awk '{print $0, "NAMESPACE"}' "$tmpdir/header"
+    cat "$tmpdir"/* | grep -v '^NAME' | column -t
+  fi
+  rm -rf "$tmpdir"
 }
 
 
