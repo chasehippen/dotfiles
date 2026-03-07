@@ -105,16 +105,6 @@ function kccla() {
     ) &
   done
 
-  # Spinner
-  spinner='-\|/'
-  i=0
-  echo -n "Scanning namespaces "
-  while [[ $(jobs -r | wc -l) -gt 0 ]]; do
-    printf "\rScanning namespaces %s" "${spinner:i++%${#spinner}:1}"
-    sleep 0.2
-  done
-  printf "\rScanning namespaces done!   \n"
-
   wait
   set -m
   if [ -f "$tmpdir/header" ]; then
@@ -142,15 +132,6 @@ function kccpa() {
     ) &
   done
 
-  spinner='-\|/'
-  i=0
-  echo -n "Pausing connectors "
-  while [[ $(jobs -r | wc -l) -gt 0 ]]; do
-    printf "\rPausing connectors %s" "${spinner:i++%${#spinner}:1}"
-    sleep 0.2
-  done
-  printf "\rPausing connectors done!   \n"
-
   wait
   set -m
   if [ -f "$tmpdir/header" ]; then
@@ -176,15 +157,6 @@ function kccra() {
       fi
     ) &
   done
-
-  spinner='-\|/'
-  i=0
-  echo -n "Resuming connectors "
-  while [[ $(jobs -r | wc -l) -gt 0 ]]; do
-    printf "\rResuming connectors %s" "${spinner:i++%${#spinner}:1}"
-    sleep 0.2
-  done
-  printf "\rResuming connectors done!   \n"
 
   wait
   set -m
