@@ -8,7 +8,7 @@ return {
   require('plugins.vim-fugitive'),
   require('plugins.lazygit'),
   require('plugins.gitsigns'),
-  require('plugins.copilot'),
+  -- require('plugins.copilot'),
   require('plugins.copilot-chat'),
   require('plugins.telescope'),
   require('plugins.trouble'),
