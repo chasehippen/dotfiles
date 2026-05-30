@@ -15,13 +15,14 @@ end, { noremap = true, silent = true, desc = "Format file" })
 map('n', '<leader>ff', require('telescope.builtin').find_files)
 map('n', '<leader>fg', require('telescope.builtin').live_grep)
 
--- Add mapping for CopilotChat Quick chat
+-- Claude (CodeCompanion) mappings
+map({ 'n', 'v' }, '<leader>ccc', '<cmd>CodeCompanionChat Toggle<CR>', { desc = "Toggle Claude chat" })
 map('n', '<leader>ccq', function()
   local input = vim.fn.input("Quick Chat: ")
   if input ~= "" then
-    require("CopilotChat").ask(input, { selection = require("CopilotChat.select").buffer })
+    vim.cmd("CodeCompanion " .. input)
   end
-end, { noremap = true, silent = true, desc = "CopilotChat - Quick chat" })
+end, { noremap = true, silent = true, desc = "Claude quick chat" })
 
 -- LSP keymaps
 map("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })

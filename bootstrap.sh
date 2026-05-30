@@ -45,6 +45,13 @@ else
   git -C "$HOME/.tmux/plugins/tpm" pull
 fi
 
+# Node.js via fnm + Claude Code CLI
+if command -v fnm >/dev/null 2>&1; then
+  eval "$(fnm env)"
+  fnm install --lts
+  npm install -g @anthropic-ai/claude-code
+fi
+
 # Create symbolic links
 ln -sf "$PWD/.gitconfig" ~/.gitconfig
 ln -sf "$PWD/.tmux.conf" ~/.tmux.conf
