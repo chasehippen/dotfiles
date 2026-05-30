@@ -12,7 +12,7 @@ return {
   require('plugins.copilot-chat'),
   require('plugins.telescope'),
   require('plugins.trouble'),
-  require('plugins.lsp-zero'),
+  require('plugins.lsp'),
+  require('plugins.conform'),
   require('plugins.which-key'),
 }
-

@@ -1,6 +1,7 @@
 # Only start tmux in interactive shells and if not already in tmux
+# -A attaches to existing session "main" or creates it if missing
 if [[ $- == *i* ]] && [[ -z "$TMUX" ]]; then
-  tmux
+  tmux new-session -A -s main
 fi
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
@@ -26,7 +27,6 @@ plugins=(
 	npm
 	zsh-autosuggestions
 	zsh-syntax-highlighting
-	dirhistory
 	history
 	)
 
@@ -71,9 +71,7 @@ alias kdds="k describe daemonset"
 alias klo="k logs"
 alias kex="k exec -it"
 alias kr="k run"
-alias ag='\ag --pager="less -XFR"'
 alias tka="tmux kill-session -a"
-alias agh='ag --hidden -U'
 
 alias gc="git checkout"
 alias gcb="git checkout -b"
@@ -87,7 +85,7 @@ alias kccr="k confluent connector resume --name "
 alias wkgn="watch \"kubectl get node -o custom-columns='NODE_POOL:metadata.labels.eks\.amazonaws\.com\/nodegroup,NAME:.metadata.name,VERSION:.status.nodeInfo.kubeletVersion,CREATED:.metadata.creationTimestamp,READY:.status.conditions[?(@.type==\\\"Ready\\\")].status,UNSCHEDULABLE:spec.unschedulable'\""
 alias wkgp="watch \"kubectl get pod\""
 alias wkgpa="watch \"kubectl get pod -A\""
-alias wkgpd="watch \"kubectl get pod -A | ag -v \\\"\(Running|Completed\)\\\"\""
+alias wkgpd="watch \"kubectl get pod -A | rg -v '(Running|Completed)'\""
 alias WOOOOO='for i in {1..10}; do echo -e "\033[1;33m🎉\033[1;34m✨\033[1;35m💥\033[0m WOOO!"; sleep 0.2; done; echo -e "\033[1;32m🎊 PARTY TIME! 🎊\033[0m"'
 alias kdrain='kubectl drain --ignore-daemonsets --delete-emptydir-data'
 
@@ -224,6 +222,19 @@ function sudop() {
   privilegescli --remove
 }
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# fnm (fast node manager)
+eval "$(fnm env --use-on-cd)"
+
+# fzf (Ctrl-R history, Ctrl-T file picker, Alt-C cd)
+source <(fzf --zsh)
+
+# zoxide (smart cd — use 'z' instead of 'cd')
+eval "$(zoxide init zsh)"
+
+# direnv (auto-load .envrc per project)
+eval "$(direnv hook zsh)"
+
+# Modern CLI aliases
+alias ls="eza --icons --group-directories-first"
+alias ll="eza -la --icons --group-directories-first --git"
+alias tree="eza --tree --icons"

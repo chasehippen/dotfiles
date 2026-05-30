@@ -3,6 +3,14 @@
 # Setup zsh
 chsh -s $(which zsh)
 
+# Homebrew dependencies
+if command -v brew >/dev/null 2>&1 && [ -f "$PWD/Brewfile" ]; then
+  echo "Installing Homebrew dependencies..."
+  brew bundle --file="$PWD/Brewfile"
+else
+  echo "Skipping Brewfile (brew not found or Brewfile missing)"
+fi
+
 # ohmyzsh
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -28,10 +36,23 @@ command -v fc-cache >/dev/null 2>&1 && fc-cache -f
 
 git clone --depth=1 'https://github.com/romkatv/powerlevel10k.git' ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k 2> /dev/null || git -C ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k pull
 
-# Create symbolic links for the config files
+# TPM (Tmux Plugin Manager)
+if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
+  echo "Installing TPM..."
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+else
+  echo "TPM already installed"
+  git -C "$HOME/.tmux/plugins/tpm" pull
+fi
+
+# Create symbolic links
 ln -sf "$PWD/.gitconfig" ~/.gitconfig
 ln -sf "$PWD/.tmux.conf" ~/.tmux.conf
 ln -sf "$PWD/.zshrc" ~/.zshrc
-ln -sf "$PWD/.config/nvim" ~/.config/nvim/
-ln -sf "$PWD/.config/alacritty" ~/.config/alacritty/
-ln -sf "$PWD/.config/lazygit" ~/.config/lazygit/
+
+# Symlink .config directories (remove existing dirs/symlinks first)
+mkdir -p ~/.config
+for dir in nvim alacritty lazygit ghostty; do
+  rm -rf "$HOME/.config/$dir"
+  ln -sf "$PWD/.config/$dir" "$HOME/.config/$dir"
+done

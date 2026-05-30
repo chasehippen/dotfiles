@@ -6,8 +6,10 @@ map('n', '<C-w>=', ':lua require("config.util").vsplit_file()<CR>', { noremap = 
 -- Map <Ctrl-w>- to invoke the split Lua command
 map('n', '<C-w>-', ':lua require("config.util").split_file()<CR>', { noremap = true, silent = true, desc = "Split File" })
 
--- Map the function to a key combination (for example, <leader>tf)
-map('n', '<leader>tf', ':lua require("config.util").format_terraform()<CR>', { noremap = true, silent = true, desc = "Format Terraform" })
+-- Format current file via conform
+map('n', '<leader>tf', function()
+  require('conform').format({ async = true, lsp_format = 'fallback' })
+end, { noremap = true, silent = true, desc = "Format file" })
 
 -- Telescope mappings
 map('n', '<leader>ff', require('telescope.builtin').find_files)
@@ -33,5 +35,5 @@ map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol" })
 map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
 
 map("n", "<leader>f", function()
-  vim.lsp.buf.format({ async = true })
+  require('conform').format({ async = true, lsp_format = 'fallback' })
 end, { desc = "Format file" })

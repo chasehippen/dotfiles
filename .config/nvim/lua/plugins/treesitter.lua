@@ -6,8 +6,11 @@ return {
     require('nvim-treesitter.configs').setup {
       highlight = { enable = true },
       ensure_installed = {
-        'javascript', 'typescript', 'css', 'html', 'json', 'yaml',
+        'javascript', 'typescript', 'tsx',
+        'css', 'html', 'json', 'yaml', 'toml',
         'go', 'python', 'lua', 'hcl', 'terraform',
+        'markdown', 'markdown_inline',
+        'sql', 'dockerfile', 'bash',
       },
     }
   end,

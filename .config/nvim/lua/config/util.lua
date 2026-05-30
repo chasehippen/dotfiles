@@ -15,15 +15,5 @@ function M.split_file()
     M.open_file_with_completion('split')
 end
 
-function M.format_terraform()
-  vim.cmd('w')
-
-  local current_file = vim.fn.expand('%:p')
-  local cmd = string.format('silent !terraform fmt %q', current_file)
-
-  vim.cmd(cmd)
-  vim.cmd('edit!')
-end
-
 return M
 
