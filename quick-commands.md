@@ -2,7 +2,7 @@
 
 A personal reference of frequently used commands for Teleport, Kubernetes, AWS, Crossplane, Istio, ArgoCD, Terraform, Go, and MongoDB.
 
-> ⚠️ **Note:** All credentials, account IDs, tenant names, and hostnames in this document are placeholders. Replace values like `REDACTED`, `<your-org>`, `<your-domain>`, `<role-name>`, etc. with values appropriate to your environment — never commit real secrets.
+> **Note:** All credentials, account IDs, tenant names, and hostnames in this document are placeholders. Replace values like `REDACTED`, `<your-org>`, `<your-domain>`, `<role-name>`, etc. with values appropriate to your environment — never commit real secrets.
 
 ---
 
@@ -19,8 +19,8 @@ A personal reference of frequently used commands for Teleport, Kubernetes, AWS, 
   - [Secrets](#secrets)
   - [Debugging](#debugging)
   - [Admission Controllers](#admission-controllers)
-  - [`kubectl run` cheatsheet](#kubectl-run-cheatsheet)
-  - [`kubectl exec` cheatsheet](#kubectl-exec-cheatsheet)
+  - [kubectl run cheatsheet](#kubectl-run-cheatsheet)
+  - [kubectl exec cheatsheet](#kubectl-exec-cheatsheet)
 - [ArgoCD](#argocd)
 - [Istio](#istio)
 - [MongoDB](#mongodb)
@@ -48,7 +48,6 @@ tctl get users --format=json \
 
       tctl get "user/$u" --format=json \
         | jq --arg ROLE "$ROLE" '
-            # unwrap 1-element arrays that some tctl versions return
             (if type=="array" then .[0] else . end)
             | .spec.roles |= map(select(. != $ROLE))
           ' \
@@ -68,7 +67,7 @@ API_GROUP=<your.api.group>
 kubectl get compositeresourcedefinitions.apiextensions.crossplane.io \
   -o jsonpath="{range .items[?(@.spec.group==\"$API_GROUP\")]}{.spec.names.plural}.{.spec.group}{\"\n\"}{end}" \
   | xargs -n1 kubectl get \
-  | ag "False"
+  | rg "False"
 ```
 
 ---
@@ -80,23 +79,11 @@ kubectl get compositeresourcedefinitions.apiextensions.crossplane.io \
 Excludes git, vendored files, examples, tests, terraform state, and binary artifacts.
 
 ```bash
-find . \
-  -path '*/.git' -prune -o \
-  -path '*/values.yaml' -prune -o \
-  -path '*example*' -prune -o \
-  -path '*test*' -prune -o \
-  -path '*/.terraform*' -prune -o \
-  -type f ! \( \
-    -name '*.tgz' -o \
-    -name '*.tar.gz' -o \
-    -name '*.zip' -o \
-    -name 'go.mod' -o \
-    -name 'go.sum' -o \
-    -name '*.md' -o \
-    -name 'README.md.gotmpl' -o \
-    -name '.helmignore' \
-  \) -print0 \
-  | while IFS= read -r -d '' file; do
+fd -t f \
+  -E .git -E values.yaml -E '*example*' -E '*test*' -E .terraform \
+  -E '*.tgz' -E '*.tar.gz' -E '*.zip' -E go.mod -E go.sum \
+  -E '*.md' -E README.md.gotmpl -E .helmignore \
+  | while IFS= read -r file; do
       printf "\n===== %s =====\n" "$file"
       cat "$file"
     done \
@@ -114,8 +101,8 @@ VALUE="your-search-string"
 
 for secret_arn in $(aws secretsmanager list-secrets --query 'SecretList[*].ARN' --output text); do
   secret_value=$(aws secretsmanager get-secret-value --secret-id "$secret_arn" --query 'SecretString' --output text)
-  if echo "$secret_value" | ag "$VALUE"; then
-    echo "Found secret with value in: $secret_arn"
+  if echo "$secret_value" | rg -q "$VALUE"; then
+    echo "Found in: $secret_arn"
   fi
 done
 ```
@@ -143,12 +130,10 @@ IMAGE_MATCH=nginx
 
 kubectl get pods --all-namespaces \
   -o jsonpath="{range .items[*]}{'pod: '}{.metadata.name}{'\tnode: '}{.spec.nodeName}{'\timages: '}{range .spec['initContainers', 'containers'][*]}{.image}{', '}{end}{'\n'}{end}" \
-  | ag "$IMAGE_MATCH"
+  | rg "$IMAGE_MATCH"
 ```
 
 #### Get all ExternalSecrets across multiple environments
-
-Assumes your kube context switches based on a `$K8S_ENV` variable (adapt to your tooling).
 
 ```bash
 for env in dev sit staging prod; do
@@ -165,11 +150,11 @@ SEARCH=<search-term>
 kubectl api-resources --verbs=list -o name | while read -r resource; do
   kubectl get "$resource" --all-namespaces \
     -o custom-columns="KIND:$resource,NAMESPACE:.metadata.namespace,NAME:.metadata.name" 2>/dev/null \
-    | ag -i "$SEARCH"
+    | rg -i "$SEARCH"
 done
 ```
 
-#### Watch for pods with fewer ready containers than total (excluding `Completed`)
+#### Watch for pods with fewer ready containers than total (excluding Completed)
 
 ```bash
 watch "kubectl get pod -A | awk 'NR == 1 || (split(\$3, a, \"/\") && a[1] < a[2] && \$4 != \"Completed\")'"
@@ -270,16 +255,14 @@ kubectl get --raw /apis/admissionregistration.k8s.io/v1/validatingwebhookconfigu
 
 ---
 
-### `kubectl run` cheatsheet
-
-Basic structure:
+### kubectl run cheatsheet
 
 ```bash
 kubectl run [NAME] --image=[IMAGE] [options]
 ```
 
 | Use case | Command |
-| --- | --- |
+|---|---|
 | Run a pod | `kubectl run my-pod --image=nginx` |
 | Expose a port | `kubectl run my-pod --image=nginx --port=80` |
 | Interactive debug pod | `kubectl run -i --tty debug --image=busybox -- sh` |
@@ -294,16 +277,14 @@ kubectl run [NAME] --image=[IMAGE] [options]
 
 ---
 
-### `kubectl exec` cheatsheet
-
-Basic structure:
+### kubectl exec cheatsheet
 
 ```bash
 kubectl exec [POD_NAME] -- [COMMAND]
 ```
 
 | Use case | Command |
-| --- | --- |
+|---|---|
 | Exec in default container | `kubectl exec my-pod -- ls /` |
 | Exec in a specific container | `kubectl exec my-pod -c my-container -- ls /` |
 | Interactive bash | `kubectl exec -it my-pod -- /bin/bash` |
@@ -313,10 +294,10 @@ kubectl exec [POD_NAME] -- [COMMAND]
 Copy files (uses `kubectl cp`, not `exec`):
 
 ```bash
-# Local → pod
+# Local -> pod
 kubectl cp /path/to/local/file my-pod:/path/to/remote/file
 
-# Pod → local
+# Pod -> local
 kubectl cp my-pod:/path/to/remote/file /path/to/local/file
 ```
 
@@ -336,8 +317,10 @@ kubectl exec -it <pod-from-above> -- /bin/bash
 ```bash
 NS=<argocd-namespace>
 
-kubectl get deployment  -n "$NS" | awk '{print $1}' | ag -v "NAME" | xargs kubectl rollout restart deployment  -n "$NS"
-kubectl get statefulset -n "$NS" | awk '{print $1}' | ag -v "NAME" | xargs kubectl rollout restart statefulset -n "$NS"
+kubectl get deployment -n "$NS" --no-headers -o custom-columns=NAME:.metadata.name \
+  | xargs kubectl rollout restart deployment -n "$NS"
+kubectl get statefulset -n "$NS" --no-headers -o custom-columns=NAME:.metadata.name \
+  | xargs kubectl rollout restart statefulset -n "$NS"
 ```
 
 ---
@@ -353,7 +336,7 @@ accessLogEncoding: JSON
 accessLogFile: /dev/stdout
 ```
 
-### Tail and filter ingress gateway access logs with `jq`
+### Tail and filter ingress gateway access logs with jq
 
 ```bash
 HOST=<your.host.example.com>
@@ -468,7 +451,7 @@ go fmt ./... \
 ### Run integration tests without noisy Terraform output
 
 ```bash
-SKIP_cleanup=true go test -v -count=1 -timeout 90m | ag -v "Still creating|Refreshing state"
+SKIP_cleanup=true go test -v -count=1 -timeout 90m | rg -v "Still creating|Refreshing state"
 ```
 
 ---
